@@ -79,7 +79,7 @@ app.get("/pay", async ({ jwt, set }) => {
     return "Bar";
   }
 
-  return (set.redirect = payload.webPaymentUrl);
+  set.redirect = payload.webPaymentUrl;
 });
 
 app.post(
