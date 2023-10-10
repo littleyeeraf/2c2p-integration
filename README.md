@@ -52,6 +52,42 @@ if (payload.respCode !== "0000") {
 set.redirect = payload.webPaymentUrl;
 ```
 
+- After payment is done, 2C2P will redirect back to `CALLBACK_URL` provided earlier with `paymentResponse`. Use `invoiceNo` from `paymentResponse` to sign JWT
+
+```js
+const resp = parseResponse(body.paymentResponse);
+const token = await jwt.sign({
+  merchantID: "2C2P_MERCHANT_ID",
+  invoiceNo: resp.invoiceNo,
+  locale: "th",
+});
+```
+
+- Request for payment status
+
+```js
+const res = await fetch("2C2P_INQUIRY_URL", {
+  method: "POST",
+  headers: { "Content-type": "application/json; charset=UTF-8" },
+  body: JSON.stringify({ payload: token }),
+});
+```
+
+- Verify JWT and validate response
+
+```js
+const data = await res.json();
+const payload = await jwt.verify(data.payload);
+if (!payload) {
+  return "Foo";
+}
+if (payload.respCode !== "0000") {
+  return "Bar";
+}
+
+// payment is success
+```
+
 # Elysia with Bun runtime
 
 ## Getting Started
